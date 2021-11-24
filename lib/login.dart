@@ -57,8 +57,7 @@ class _MyLoginState extends State<MyLogin> {
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [Text('Sign In', style: TextStyle(
-                        backgroundColor: Color(0xff4c505b), fontSize: 27, fontWeight: FontWeight.w700
+                      children: const [Text('Sign In', style: TextStyle(fontSize: 27, fontWeight: FontWeight.w700
                     ),
                     )],
                     ),
