@@ -23,40 +23,7 @@ void main() async{
   ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return MultiProvider(providers: [
-      Provider<AuthService>(
-        create: (_) => AuthService(FirebaseAuth.instance),
-      ),
-      StreamProvider(create: (context) => context.read<AuthService>().authStateChanges,
-      ),
-    ],
-    child: const MaterialApp(
-      title: "Login",
-      home: AuthWrapper(),
-    ),
-    );
-  }
-}
-
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final user = context.watch<User>();
-
-    if(user != null){
-      return const HomeScreen();
-    } else{
-      return const MyLogin();
-    }
-  }
-}
 
 
 
