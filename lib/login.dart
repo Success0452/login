@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:login/services/auth_services.dart';
+import 'package:provider/provider.dart';
 
 class MyLogin extends StatefulWidget {
   const MyLogin({Key? key}) : super(key: key);
@@ -8,6 +10,9 @@ class MyLogin extends StatefulWidget {
 }
 
 class _MyLoginState extends State<MyLogin> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -32,7 +37,9 @@ class _MyLoginState extends State<MyLogin> {
                 ),
                 child: Column(
                   children: [
-                    TextField(decoration: InputDecoration(
+                    TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
                       fillColor: Colors.grey.shade100,
                       filled: true,
                       hintText: 'Email',
@@ -43,7 +50,9 @@ class _MyLoginState extends State<MyLogin> {
                     const SizedBox(
                       height: 30,
                     ),
-                    TextField(obscureText: true,
+                    TextField(
+                      controller: passwordController,
+                      obscureText: true,
                         decoration: InputDecoration(
                         fillColor: Colors.grey.shade100,
                         filled: true,
@@ -58,15 +67,48 @@ class _MyLoginState extends State<MyLogin> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Sign In', style: TextStyle(
-                          color:Color(0xff4c505b),
-                            fontSize: 27, fontWeight: FontWeight.w700
-                    ),
-                    ),
+                        TextButton(
+                            onPressed: () {
+                              final String email = emailController.text.trim();
+                              final String password = passwordController.text.trim();
+
+                              if(email.isEmpty)
+                              {
+                                print("email is Empty");
+                              } else if(password.isEmpty){
+                                print("Password is empty");
+                              } else {
+                                context.read<AuthService>().login(
+                                  email,
+                                  password,
+                                );
+                              }
+                            },
+                            child: const Text('Sign In', style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                fontSize: 18,
+                                color: Color(0xff4c505b)
+                            ),)),
                         CircleAvatar(
                           radius: 30,
                           backgroundColor: Color(0xff4c505b),
-                          child: IconButton(onPressed: () {},
+                          child: IconButton(onPressed: () {
+
+                            final String email = emailController.text.trim();
+                            final String password = passwordController.text.trim();
+
+                            if(email.isEmpty)
+                              {
+                                print("email is Empty");
+                              } else if(password.isEmpty){
+                                print("Password is empty");
+                            } else {
+                              context.read<AuthService>().login(
+                                  email,
+                                  password,
+                              );
+                            }
+                          },
                               color: Colors.white,
                               icon: Icon(Icons.arrow_forward)),
                         )
