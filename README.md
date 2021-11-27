@@ -2,19 +2,16 @@
 
 This is a capstone project assigned to Group 4 of SideHustle Mobile app Dev. internship
 
-<img src="https://raw.githubusercontent.com/codewithuzi/login/master/1.png" width="300" height="500" /> <img src="https://raw.githubusercontent.com/codewithuzi/login/master/2.png" width="300" height="500" />
+<img src="https://raw.githubusercontent.com/codewithuzi/login/master/1.png" width="300" height="500" />  <img src="https://raw.githubusercontent.com/codewithuzi/login/master/2.png" width="300" height="500" />
 
 
-
-<img src="https://raw.githubusercontent.com/codewithuzi/login/master/3.png" width="300" height="500" /> <img src="https://raw.githubusercontent.com/codewithuzi/login/master/4.png" width="300" height="500" />
+<img src="https://raw.githubusercontent.com/codewithuzi/login/master/3.png" width="300" height="500" />  <img src="https://raw.githubusercontent.com/codewithuzi/login/master/4.png" width="300" height="500" />
 
 
 
 ## Error-Hanlding
 
-<img src="https://raw.githubusercontent.com/codewithuzi/login/master/5.png" width="300" height="500" />
-
-<img src="https://raw.githubusercontent.com/codewithuzi/login/master/6.png" width="300" height="500" />
+<img src="https://raw.githubusercontent.com/codewithuzi/login/master/5.png" width="300" height="500" />  <img src="https://raw.githubusercontent.com/codewithuzi/login/master/6.png" width="300" height="500" />
 
 
 
