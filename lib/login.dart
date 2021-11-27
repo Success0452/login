@@ -1,6 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:login/services/auth_services.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/rendering.dart';
+import 'package:login/home_screen.dart';
 
 class MyLogin extends StatefulWidget {
   const MyLogin({Key? key}) : super(key: key);
@@ -10,108 +11,169 @@ class MyLogin extends StatefulWidget {
 }
 
 class _MyLoginState extends State<MyLogin> {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  final formkey = GlobalKey<FormState>();
+  final _auth = FirebaseAuth.instance;
+  String email = '';
+  String password = '';
+  bool isloading = false;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        image: DecorationImage(image: AssetImage(''), fit: BoxFit.cover)),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Stack(
+    return Scaffold(
+      body: Form(
+        key: formkey,
+        child: Stack(
           children: [
             Container(
-              padding: const EdgeInsets.only(left: 35, top: 130, ),
+              height: double.infinity,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: AssetImage('assets/bg.jpg'),
+                ),
+              ),
+            ),
+            Container(
+              color: Colors.black.withOpacity(0.45),
+            ),
+            Container(
+              height: double.infinity,
+              width: double.infinity,
+              padding: const EdgeInsets.only(
+                left: 35,
+                top: 130,
+              ),
               child: const Text(
                 'Welcome\nBack',
-                style: TextStyle(color: Colors.black87, fontSize: 33),
+                style: TextStyle(
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 33),
               ),
             ),
             SingleChildScrollView(
               child: Container(
-                padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.5,
-                right: 35,
-                left: 35
-                ),
+                padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.5,
+                    right: 35,
+                    left: 35),
                 child: Column(
                   children: [
-                    TextField(
-                      controller: emailController,
+                    TextFormField(
+                      keyboardType: TextInputType.emailAddress,
+                      onChanged: (value) {
+                        email = value;
+                      },
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Please enter Email";
+                        }
+                      },
                       decoration: InputDecoration(
-                      fillColor: Colors.grey.shade100,
-                      filled: true,
-                      hintText: 'Email',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10)
-                      )
-                    ),),
+                          fillColor: Colors.grey.shade100,
+                          filled: true,
+                          hintText: 'Email',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10))),
+                    ),
                     const SizedBox(
                       height: 30,
                     ),
-                    TextField(
-                      controller: passwordController,
+                    TextFormField(
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Please enter Password";
+                        }
+                      },
+                      onChanged: (value) {
+                        password = value;
+                      },
                       obscureText: true,
-                        decoration: InputDecoration(
-                        fillColor: Colors.grey.shade100,
-                        filled: true,
-                        hintText: 'Password',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10)
-                        )
-                    ),),
+                      decoration: InputDecoration(
+                          fillColor: Colors.grey.shade100,
+                          filled: true,
+                          hintText: 'Password',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10))),
+                    ),
                     const SizedBox(
                       height: 40,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextButton(
-                            onPressed: () {
-                              final String email = emailController.text.trim();
-                              final String password = passwordController.text.trim();
+                        const Text(
+                          'Sign In',
+                          style: TextStyle(
+                              color: Colors.white60,
+                              fontSize: 27,
+                              fontWeight: FontWeight.w700),
+                        ),
+                        isloading
+                            ? const Center(
+                                child: CircularProgressIndicator(),
+                              )
+                            : CircleAvatar(
+                                radius: 30,
+                                backgroundColor: Colors.teal,
+                                child: IconButton(
+                                    onPressed: () async {
+                                      if (formkey.currentState!.validate()) {
+                                        setState(() {
+                                          isloading = true;
+                                        });
+                                        try {
+                                          await _auth
+                                              .signInWithEmailAndPassword(
+                                                  email: email,
+                                                  password: password);
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child:
+                                                    Text('Logged in Success'),
+                                              ),
+                                              duration: Duration(seconds: 5),
+                                            ),
+                                          );
+                                          await Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (contex) =>
+                                                  const HomeScreen(),
+                                            ),
+                                          );
 
-                              if(email.isEmpty)
-                              {
-                                print("email is Empty");
-                              } else if(password.isEmpty){
-                                print("Password is empty");
-                              } else {
-                                context.read<AuthService>().login(
-                                  email,
-                                  password,
-                                );
-                              }
-                            },
-                            child: const Text('Sign In', style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                fontSize: 18,
-                                color: Color(0xff4c505b)
-                            ),)),
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Color(0xff4c505b),
-                          child: IconButton(onPressed: () {
-
-                            final String email = emailController.text.trim();
-                            final String password = passwordController.text.trim();
-
-                            if(email.isEmpty)
-                              {
-                                print("email is Empty");
-                              } else if(password.isEmpty){
-                                print("Password is empty");
-                            } else {
-                              context.read<AuthService>().login(
-                                  email,
-                                  password,
-                              );
-                            }
-                          },
-                              color: Colors.white,
-                              icon: Icon(Icons.arrow_forward)),
-                        )
+                                          setState(() {
+                                            isloading = false;
+                                          });
+                                        } on FirebaseAuthException catch (e) {
+                                          showDialog(
+                                            context: context,
+                                            builder: (ctx) => AlertDialog(
+                                              title: const Text(
+                                                  "Ops! Login Failed"),
+                                              content: Text('${e.message}'),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.of(ctx).pop();
+                                                  },
+                                                  child: const Text('Okay'),
+                                                )
+                                              ],
+                                            ),
+                                          );
+                                        }
+                                        setState(() {
+                                          isloading = false;
+                                        });
+                                      }
+                                    },
+                                    color: Colors.white,
+                                    icon: const Icon(Icons.arrow_forward_ios)))
                       ],
                     ),
                     const SizedBox(
@@ -124,18 +186,23 @@ class _MyLoginState extends State<MyLogin> {
                             onPressed: () {
                               Navigator.pushNamed(context, 'register');
                             },
-                            child: const Text('Sign Up', style: TextStyle(
-                          decoration: TextDecoration.underline,
-                          fontSize: 18,
-                          color: Color(0xff4c505b)
-                        ),)),
-                        TextButton(
-                            onPressed: () {},
-                            child: const Text('Forget Password', style: TextStyle(
+                            child: const Text(
+                              'Sign Up',
+                              style: TextStyle(
                                 decoration: TextDecoration.underline,
                                 fontSize: 18,
-                                color: Color(0xff4c505b)
-                            ),))
+                                color: Colors.white60,
+                              ),
+                            )),
+                        TextButton(
+                            onPressed: () {},
+                            child: const Text(
+                              'Forget Password',
+                              style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  fontSize: 18,
+                                  color: Color(0xff4c505b)),
+                            ))
                       ],
                     ),
                   ],

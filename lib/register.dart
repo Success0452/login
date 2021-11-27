@@ -1,8 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:login/services/auth_services.dart';
-import 'package:provider/provider.dart';
 
 class MyRegister extends StatefulWidget {
   const MyRegister({Key? key}) : super(key: key);
@@ -12,112 +9,185 @@ class MyRegister extends StatefulWidget {
 }
 
 class _MyRegisterState extends State<MyRegister> {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  final formkey = GlobalKey<FormState>();
+  final _auth = FirebaseAuth.instance;
+  String name = '';
+  String email = '';
+  String password = '';
+  bool isloading = false;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-          image: DecorationImage(image: AssetImage(''), fit: BoxFit.cover)),
-      child: Scaffold(
-        appBar: AppBar(backgroundColor: Colors.white, elevation: 0,),
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
         backgroundColor: Colors.transparent,
-        body: Stack(
+        elevation: 0.0,
+      ),
+      // backgroundColor: Colors.transparent,
+      body: Form(
+        key: formkey,
+        child: Stack(
           children: [
             Container(
-              padding: const EdgeInsets.only(left: 35, top: 130, ),
+              height: double.infinity,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: AssetImage('assets/bg1.jpg'),
+                ),
+              ),
+            ),
+            Container(
+              height: double.infinity,
+              width: double.infinity,
+              color: Colors.black.withOpacity(0.45),
+            ),
+            Container(
+              padding: const EdgeInsets.only(
+                left: 35,
+                top: 175,
+              ),
               child: const Text(
                 'Create\nAccount',
-                style: TextStyle(color: Colors.black87, fontSize: 33),
+                style: TextStyle(color: Colors.white70, fontSize: 33),
               ),
             ),
             SingleChildScrollView(
               child: Container(
-                padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.5,
+                padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).size.height * 0.40,
                     right: 35,
-                    left: 35
-                ),
+                    left: 35),
                 child: Column(
                   children: [
-                    TextField(
+                    TextFormField(
+                      keyboardType: TextInputType.text,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Please enter your name";
+                        }
+                      },
+                      onChanged: (value) {
+                        name = value;
+                      },
                       decoration: InputDecoration(
-                        fillColor: Colors.grey.shade100,
-                        filled: true,
-                        hintText: 'Name',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10)
-                        )
-                    ),),
+                          fillColor: Colors.grey.shade100,
+                          filled: true,
+                          hintText: 'Name',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10))),
+                    ),
+                    const SizedBox(height: 30),
+                    TextFormField(
+                      keyboardType: TextInputType.emailAddress,
+                      onChanged: (value) {
+                        email = value.toString().trim();
+                      },
+                      validator: (value) =>
+                          (value!.isEmpty) ? ' Please enter email' : null,
+                      decoration: InputDecoration(
+                          fillColor: Colors.grey.shade100,
+                          filled: true,
+                          hintText: 'Email',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10))),
+                    ),
                     const SizedBox(
                       height: 30,
                     ),
-                    TextField(
-                      controller: emailController,
-                      decoration: InputDecoration(
-                        fillColor: Colors.grey.shade100,
-                        filled: true,
-                        hintText: 'Email',
-                        border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10)
-                        )
-                    ),),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    TextField(
-                      controller: passwordController,
+                    TextFormField(
                       obscureText: true,
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "Please enter Password";
+                        }
+                      },
+                      onChanged: (value) {
+                        password = value;
+                      },
                       decoration: InputDecoration(
                           fillColor: Colors.grey.shade100,
                           filled: true,
                           hintText: 'Password',
                           border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)
-                          )
-                      ),),
+                              borderRadius: BorderRadius.circular(10))),
+                    ),
                     const SizedBox(
                       height: 40,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        TextButton(
-                            onPressed: () {
-                              final String email = emailController.text.trim();
-                              final String password = passwordController.text.trim();
-
-                              if(email.isEmpty)
-                              {
-                                print("email is Empty");
-                              } else if(password.isEmpty){
-                                print("Password is empty");
-                              } else {
-                                context.read<AuthService>().signUp(
-                                  email,
-                                  password,
-                                ).then((value) async {
-                                  User user = FirebaseAuth.instance.currentUser;
-                                  await FirebaseFirestore.instance.collection("users").doc(user.uid).set({
-                                    'uid': user.uid,
-                                    'email': email,
-                                    'password': password
-                                  });
-                                });
-                              }
-                            },
-                            child: const Text('Sign Up', style: TextStyle(
-                                decoration: TextDecoration.underline,
-                                fontSize: 18,
-                                color: Color(0xff4c505b)
-                            ),)),
-                        CircleAvatar(
-                          radius: 30,
-                          backgroundColor: Color(0xff4c505b),
-                          child: IconButton(onPressed: () {},
-                              color: Colors.white,
-                              icon: Icon(Icons.arrow_forward)),
-                        )
+                        const Text(
+                          'Sign Up',
+                          style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 27,
+                              fontWeight: FontWeight.w700),
+                        ),
+                        isloading
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.teal,
+                                ),
+                              )
+                            : CircleAvatar(
+                                radius: 30,
+                                backgroundColor: Colors.teal,
+                                child: IconButton(
+                                  color: Colors.white,
+                                  icon: const Icon(Icons.arrow_forward),
+                                  onPressed: () async {
+                                    if (formkey.currentState!.validate()) {
+                                      setState(() {
+                                        isloading = true;
+                                      });
+                                      try {
+                                        await _auth
+                                            .createUserWithEmailAndPassword(
+                                                email: email,
+                                                password: password);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Padding(
+                                              padding: EdgeInsets.all(8.0),
+                                              child: Text(
+                                                  'Successfully Registered, You can Sign in Now'),
+                                            ),
+                                            duration: Duration(seconds: 5),
+                                          ),
+                                        );
+                                        Navigator.of(context).pop();
+                                        setState(() {
+                                          isloading = false;
+                                        });
+                                      } on FirebaseAuthException catch (e) {
+                                        showDialog(
+                                            context: context,
+                                            builder: (ctx) => AlertDialog(
+                                                  title: const Text(
+                                                      'Ops! Registration Failed'),
+                                                  content: Text('${e.message}'),
+                                                  actions: [
+                                                    TextButton(
+                                                      onPressed: () {
+                                                        Navigator.of(ctx).pop();
+                                                      },
+                                                      child: const Text('Okay'),
+                                                    )
+                                                  ],
+                                                ));
+                                        setState(() {
+                                          isloading = false;
+                                        });
+                                      }
+                                    }
+                                  },
+                                ),
+                              )
                       ],
                     ),
                     const SizedBox(
@@ -130,12 +200,14 @@ class _MyRegisterState extends State<MyRegister> {
                             onPressed: () {
                               Navigator.pushNamed(context, 'login');
                             },
-                            child: const Text('Sign In', style: TextStyle(
+                            child: const Text(
+                              'Sign In',
+                              style: TextStyle(
                                 decoration: TextDecoration.underline,
                                 fontSize: 18,
-                                color: Color(0xff4c505b)
-                            ),)),
-
+                                color: Colors.white70,
+                              ),
+                            )),
                       ],
                     ),
                   ],
